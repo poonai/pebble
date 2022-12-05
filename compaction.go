@@ -2378,6 +2378,7 @@ func (d *DB) runCompaction(
 	writerOpts := d.opts.MakeWriterOptions(c.outputLevel.level, tableFormat)
 	if formatVers < FormatBlockPropertyCollector {
 		// Cannot yet write block properties.
+		fmt.Println("set nil")
 		writerOpts.BlockPropertyCollectors = nil
 	}
 

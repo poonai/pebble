@@ -491,6 +491,10 @@ func (d *DB) Get(key []byte) ([]byte, io.Closer, error) {
 	return d.getInternal(key, nil /* batch */, nil /* snapshot */)
 }
 
+func (d *DB) GetWithOpt(key []byte, opt IterOptions) ([]byte, io.Closer, error) {
+	return d.getInternal(key, nil /* batch */, nil /* snapshot */, opt)
+}
+
 type getIterAlloc struct {
 	dbi    Iterator
 	keyBuf []byte
@@ -503,7 +507,7 @@ var getIterAllocPool = sync.Pool{
 	},
 }
 
-func (d *DB) getInternal(key []byte, b *Batch, s *Snapshot) ([]byte, io.Closer, error) {
+func (d *DB) getInternal(key []byte, b *Batch, s *Snapshot, opt ...IterOptions) ([]byte, io.Closer, error) {
 	if err := d.closed.Load(); err != nil {
 		panic(err)
 	}
@@ -558,6 +562,10 @@ func (d *DB) getInternal(key []byte, b *Batch, s *Snapshot) ([]byte, io.Closer, 
 		comparer:     *d.opts.Comparer,
 		readState:    readState,
 		keyBuf:       buf.keyBuf,
+	}
+
+	if len(opt) > 0 {
+		i.opts = opt[0]
 	}
 
 	if !i.First() {
